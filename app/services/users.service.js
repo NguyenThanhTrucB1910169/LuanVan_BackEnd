@@ -1,29 +1,43 @@
-const sql = require('../config/index')
+import db from "../models";
 
-const Users = function (user) {
-    this.name = user.name;
-    this.address = user.address;
-    this.password = user.password;
-    this.confirmpassword = user.confirmpassword;
-    this.phone = user.phone;
-    this.avatar = user.avatar;
+const createNewUser = (user) => {
+    return new Promise(async(resolve, reject) => {
+       try {
+         await db.Users.create({
+            fullname: user.fullname,
+            username: user.username,
+            address: user.address,
+            email: user.email,
+            gender: user.gender == '1' ? true : false,
+            password: user.password,
+            avatar: user.avatar,
+            phone: user.phone,
+        })
+        resolve("create donr")
+       } catch (error) {
+        reject(error)
+       }
+       
+    })
 }
 
-Users.create = (newUser, result) => {
-    sql.db.sql.query("INSERT INTO users SET ?", newUser, (err, res) => {
-        if (err) {
-            console.error(err);
-            result(err, null);
-            return;
+const authUser = (info) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let user = await db.Users.findOne({
+                where: {
+                   username: info.username,
+                   password: info.password,
+                  }
+            })
+            resolve(user)
+        } catch (error) {
+            reject(error)
         }
-        // console.log('create products', {id: res.insertId, ...newProduct})
-        result(null, { id: res.insertId, ...newUser });
-        // res.send(result);
-    });
+    })
 }
 
-// Users.post = () => {
-
-// }
-
-module.exports = Users
+module.exports ={
+    createNewUser,
+    authUser
+}

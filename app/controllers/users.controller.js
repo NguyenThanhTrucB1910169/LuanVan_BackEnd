@@ -1,30 +1,41 @@
-const Users = require("../services/users.service")
+import * as userService from '../services/users.service'
+const sendToken = require('../middleware/jwtoken')
 
-exports.create = async(req, res) => {
-    if (!req.body) {
-        res.status(400).send({
-          message: "Content can not be empty!"
-        });
-      }
-    
-      // Create a Tutorial
-      const account = new Users({
-        name: req.body.name,
-        address: req.body.address,
-        password: req.body.password,
-        confirmpassword: req.body.confirmpassword,
-        // avatar: req.body.avatar,
-        // phone: req.body.phone,
-      });
-    
-      // Save Tutorial in the database
-      Users.create(account, (err, data) => {
-        if (err)
-          res.status(500).send({
-            message:
-              err.message || "Some error occurred while creating the Tutorial."
-          });
-        else res.send(data);
-      });
-    
+exports.createUser = async(req, res) => {
+    try {
+        await userService.createNewUser(req.body)
+        res.send("create new user")
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.authLogin = async(req, res) => {
+    // const {username, password} = req.body
+    if(!req.body){
+        res.send("Content empty")
+    }
+    const user =  await userService.authUser(req.body)
+    if(!user){
+        res.send("invalid info")
+    } else {
+        let userSend = {
+            id: user.id,
+            username: user.username,
+        }
+        sendToken(userSend, 200, res);
+    }
+}
+
+exports.logout = async(req, res) => {
+    console.log("logout")
+    res.cookie("token", null, {
+        expires: new Date(Date.now()),
+        httpOnly: true,
+    })
+
+    res.status(200).json({
+        success: true,
+        message: "LogOut"
+    })
 }
