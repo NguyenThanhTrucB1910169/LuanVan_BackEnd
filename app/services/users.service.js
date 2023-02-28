@@ -37,7 +37,20 @@ const authUser = (info) => {
     })
 }
 
+const updateUser = (info, id) => {
+    return new Promise((resolve, reject) => {
+        try {
+            db.Users.update(info,{where:{id: id}})
+            .then(() => {return db.Users.findOne({where: {id: id}})})
+            .then((user) => resolve(user))
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports ={
     createNewUser,
-    authUser
+    authUser,
+    updateUser
 }

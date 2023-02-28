@@ -1,5 +1,8 @@
 import * as userService from '../services/users.service'
 const sendToken = require('../middleware/jwtoken')
+import ApiError from '../api-error'
+const jwt = require('jsonwebtoken')
+require('dotenv').config()
 
 exports.createUser = async(req, res) => {
     try {
@@ -12,6 +15,7 @@ exports.createUser = async(req, res) => {
 
 exports.authLogin = async(req, res) => {
     // const {username, password} = req.body
+    // console.log(req.cookies)
     if(!req.body){
         res.send("Content empty")
     }
@@ -22,20 +26,44 @@ exports.authLogin = async(req, res) => {
         let userSend = {
             id: user.id,
             username: user.username,
+            // fullname: user.fullname,
+            // address: user.address,
+            // email: user.email,
+            // gender: user.gender,
+            // password: user.password,
+            // avatar: user.avatar,
+            // phone: user.phone,
+            // role: user.role,
         }
-        sendToken(userSend, 200, res);
+        sendToken(userSend, 200, res, user);
     }
 }
 
-exports.logout = async(req, res) => {
-    console.log("logout")
+exports.logout = (req, res) => {
+    // console.log(req.cookies)
     res.cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
     })
-
     res.status(200).json({
         success: true,
         message: "LogOut"
     })
+}
+
+exports.updateInfo = async(req, res) => {
+    try {
+        if(req.cookies.token){
+            jwt.verify(req.cookies.token,process.env.JWT_SECRET, async(err, jwtoken) => {
+                if(err) console.log(err);
+                else {
+                    await userService.updateUser(req.body, jwtoken.id).then((val) => {
+                        res.status(200).json(val);
+                    })
+                }
+            })
+        }
+    } catch (error) {
+        new ApiError(500, 'Update unsuccessfully')
+    }
 }

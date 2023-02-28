@@ -3,22 +3,18 @@ const sequelize = require("sequelize");
 
 const cartCreate = (userId) => {
     return new Promise(async (resolve, reject) => {
-      console.log("userid" , userId);
+      // console.log("userid" , userId);
         try {
-          let findUser = await db.Carts.findAll({where: {userId: userId}}).catch(
-            (err) => {
-              console.log(err);
-            }
-          );
-          if(findUser) {
-          resolve("Alrealdy have");
-          } else {
+          let findUser = await db.Carts.findAll({where: {userId: userId}})
+            // console.log(typeof findUser)
+            // console.log(!findUser)
+          if(findUser.length === 0) {
             await db.Carts.create({
               userId: userId,
-            }).then(() => {
-              resolve("Creat done");
             })
+            resolve(true)
           }
+          resolve(false)
         } catch (e) {
           reject(e);
         }
@@ -29,6 +25,7 @@ const cartCreate = (userId) => {
 const getCartId = (userId) => {
   return new Promise(async (resolve, reject) => {
       try {
+        console.log(userId);
         let cartid = await db.Carts.findOne({
           where: {userId: userId},
           attributes: ['id'], 
@@ -46,12 +43,36 @@ const createCartItem = (data) => {
         try {
           // console.log(data);
           // console.log(data.cartId)
-          await db.CartItems.create({
+          // console.log(data)
+          let product = await db.CartItems.findOne({
+            where: {
+              productId: data.productId,
+              cartId: data.cartId
+            }
+          })
+          // console.log(product)
+          if(product) {
+            await db.CartItems.update({
+              quantity: product.quantity + 1
+            },
+            { where: {cartId: product.cartId,
+              productId: product.productId
+            },})
+          }
+          else {
+            await db.CartItems.create({
             cartId: data.cartId,
             productId: data.productId,
             quantity: data.quantity
           });
-          resolve("Creat done");
+          }
+          
+          // await db.CartItems.create({
+          //   cartId: data.cartId,
+          //   productId: data.productId,
+          //   quantity: data.quantity
+          // });
+          resolve("success");
         } catch (e) {
           reject(e);
         }
@@ -85,12 +106,14 @@ const updateCartItem = (userId, req) => {
       await getCartId(userId).then(async(response) => {
         // console.log(response);
         await db.CartItems.update(
-          {quantity: req.quantity},
-           { where: {cartId: response.id,
-              productId: req.id
+          {quantity: req.qt},
+          {where: {cartId: response.id,
+              productId: req.pd
             },}
-          ).then((data) => {
+          ).then(() => {
+            getCart(userId).then((data) => {
               resolve(data);
+            })
           }) 
       })
       // console.log(cartid)
