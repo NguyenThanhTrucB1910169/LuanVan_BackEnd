@@ -38,6 +38,7 @@ const authUser = (info) => {
 }
 
 const updateUser = (info, id) => {
+    console.log(info)
     return new Promise((resolve, reject) => {
         try {
             db.Users.update(info,{where:{id: id}})

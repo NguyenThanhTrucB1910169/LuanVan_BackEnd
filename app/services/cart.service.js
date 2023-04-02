@@ -125,11 +125,33 @@ const updateCartItem = (userId, req) => {
   })
 }
 
+const deleteCartItem = (user, id) => {
+  return new Promise(async(resolve, reject) => {
+    try {
+      console.log(user, id);
+      await getCartId(user).then(async(response) => {
+        // console.log(response);
+        await db.CartItems.destroy(
+          {where: {cartId: response.id,
+              productId: id
+            },}
+          ).then(() => {
+            getCart(user).then((data) => {
+              resolve(data);
+            })
+          }) 
+      })
+    } catch (error) {
+      reject(error);
+    }
+  })
+}
 
 module.exports = {
     cartCreate,
     getCart,
     createCartItem,
     getCartId,
-    updateCartItem
+    updateCartItem,
+    deleteCartItem
 };

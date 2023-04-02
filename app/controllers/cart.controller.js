@@ -41,6 +41,7 @@ exports.addToCart = async (req, res) => {
 exports.getCart = async (req, res) => {
   try {
     let token = req.cookies.token
+    // console.log(token);
     jwt.verify(
       token,
       process.env.JWT_SECRET,
@@ -60,10 +61,12 @@ exports.getCart = async (req, res) => {
 };
 
 exports.updateCartItem = async (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   try {
     if(req.body){
       let token = req.cookies.token
+      // console.log(token)
+      // console.log(req)
       jwt.verify(
       token,
       process.env.JWT_SECRET,
@@ -98,4 +101,28 @@ exports.updateCartItem = async (req, res) => {
   } catch (error) {
     console.log(error);
   }
+
 };
+exports.deleteCartItem = async (req, res) => {
+  let token = req.cookies.token
+  // console.log(token)
+  // console.log(req.body)
+  try {
+    if(req.body){
+      jwt.verify(
+      token,
+      process.env.JWT_SECRET,
+      async (err, verifiedJwt) => {
+        if (err) {
+          console.log(err.message);
+        } else {
+          await cartService.deleteCartItem(verifiedJwt.id, req.body.id).then((data) => {
+            // console.log(data);
+            res.json(data);
+          })
+        }
+    })}
+  } catch (error) {
+    console.log(error);
+  }
+}
