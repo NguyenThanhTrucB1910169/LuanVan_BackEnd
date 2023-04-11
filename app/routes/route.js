@@ -9,7 +9,10 @@ const order = require("../controllers/order.controller")
 
 const router = express.Router();
 
-router.route("/products").get(products.getData).post(products.sendData);
+router.route("/products")
+.get(products.getData)
+.post(products.sendData)
+.put(products.updateProduct)
 //     .delete(products.delete);
 // router.route("/cartload/:user")
 // .get(cart.getDetailCart)
@@ -21,13 +24,17 @@ router.route("/payment").post(payment.handlePayment);
 // router.route("/payment/status/:client_secret").get(payment.retrieve);
 // router.route("/payment/confirm/:client_secret").get(payment.confirmPayment);
 router.route("/product/:id").get(products.getById);
+router.route("/allidproducts").get(products.getAllIds);
+router.route('/deleteproduct').delete(products.deleteProduct);
 router.route("/logout").get(users.logout);
 router.route("/cartload")
 .get(cart.getCart)
 .put(cart.updateCartItem)
 router.route("/deletecart").delete(cart.deleteCartItem);
+router.route('/alldelete').delete(cart.deleteAllCart);
 router.route("/updateinfo").put(users.updateInfo);
 router.route('/order').post(order.addOrder)
 .get(order.getByUser)
 router.route('/order/:id').get(order.getDetailOrder)
+router.route('/allorders').get(order.getAllOrders)
 module.exports = router;

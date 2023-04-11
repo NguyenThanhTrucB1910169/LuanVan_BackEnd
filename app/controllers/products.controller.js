@@ -1,4 +1,7 @@
 import * as productServices from '../services/products.service'
+require("dotenv").config();
+import jwt from "jsonwebtoken";
+
 
 exports.getData = async(req, res) => {
   try {
@@ -19,6 +22,25 @@ exports.sendData = async(req, res) => {
   }
 }
 
+exports.deleteProduct = async(req, res) => {
+  try {
+    if(req.body.id){
+      let token = req.cookies.token;
+      jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
+        if(err) console.log(err);
+        else if(verifiedJwt.role !== 1) res.send('No permission')
+        else {
+          await productServices.deleteProduct(req.body.id).then((rs) => {
+            res.json(rs)
+          })
+        }
+      })
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 exports.getById = async(req, res) => {
   try {
     console.log(req.params.id)
@@ -27,6 +49,35 @@ exports.getById = async(req, res) => {
     //   res.json(data);
     // })
     res.send(item);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+exports.getAllIds = async(req, res) => {
+  try {
+    await productServices.getAllId().then((data) => {
+      res.json(data);
+    })
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+exports.updateProduct = async (req, res) => {
+  try {
+    if(req.body.id){
+      let token = req.cookies.token;
+      jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
+        if(err) console.log(err);
+        else if(verifiedJwt.role !== 1) res.send('No permission')
+        else {
+          await productServices.updateProduct(req.body).then((rs) => {
+            res.json(rs)
+          })
+        }
+      })
+    }
   } catch (error) {
     console.log(error);
   }

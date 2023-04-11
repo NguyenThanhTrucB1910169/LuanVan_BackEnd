@@ -20,20 +20,17 @@ exports.authLogin = async(req, res) => {
         res.send("Content empty")
     }
     const user =  await userService.authUser(req.body)
+    // console.log(user)
     if(!user){
         res.send("invalid info")
-    } else {
+    } 
+    else if(user.role === 1) {
+        sendToken({role: user.role, username: user.username}, 200, res, null)
+    }
+    else {
         let userSend = {
             id: user.id,
             username: user.username,
-            // fullname: user.fullname,
-            // address: user.address,
-            // email: user.email,
-            // gender: user.gender,
-            // password: user.password,
-            // avatar: user.avatar,
-            // phone: user.phone,
-            // role: user.role,
         }
         sendToken(userSend, 200, res, user);
     }

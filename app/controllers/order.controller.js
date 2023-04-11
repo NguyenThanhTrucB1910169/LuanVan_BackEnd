@@ -29,6 +29,8 @@ exports.addOrder = (req, res) => {
           );
           const orderItems = await Promise.all(orderItemsPromises);
           const done = orderItems.every((item) => item === true);
+          // console.log(orderItems)
+          // await orderService.updateCount();
           res.json(done);
         }
       });
@@ -78,4 +80,22 @@ exports.getDetailOrder = (req, res) => {
     } catch (error) {
         console.log(error)
     }
+}
+
+exports.getAllOrders = (req, res) => {
+  try {
+    let token = req.cookies.token;
+    jwt.verify(token, process.env.JWT_SECRET, async(err, verifiedJwt) => {
+        if(err) {
+            res.status(400).send('not logged in')
+        }
+        else{
+          await orderService.getAllOrders().then((dt) => {
+            res.json(dt)
+          })
+      }}
+      )
+  } catch (error) {
+    console.log(error)
+  }
 }

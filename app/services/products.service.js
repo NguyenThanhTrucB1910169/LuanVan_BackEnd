@@ -59,9 +59,67 @@ const getByCartItem = () => {
   });
 };
 
+const getAllId = () => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.Products.findAll({
+        attributes: ["id"],
+      }).then((data) => {
+        resolve(data);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const deleteProduct = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.Products.destroy({ where: { id: id } }).then((rowDeleted) => {
+        if (rowDeleted === 1) {
+          resolve(true);
+        } else resolve(false);
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const updateProduct = (product) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.Products.update(
+        {
+          name: product.name,
+          price: product.price,
+          count: product.count,
+          type: product.type,
+          description: product.description,
+          material: product.material,
+          image: product.imageUrl.toString(),
+        },
+        {
+          where: { id: product.id }
+        }
+      ).then(() => {
+        db.Products.findOne({where: {id: product.id}}).then(product => {
+          resolve(product);
+        })
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   createNewProduct,
   getAllProducts,
   findById,
   getByCartItem,
+  getAllId,
+  deleteProduct,
+  updateProduct,
 };
