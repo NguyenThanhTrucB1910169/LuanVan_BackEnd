@@ -11,9 +11,12 @@ exports.addOrder = (req, res) => {
         if (err) {
           console.log(err.message);
         } else {
+          console.log(req.body);
           const order = await orderService.addOrder(
             verifiedJwt.id,
-            req.body.total
+            req.body.total,
+            req.body.status,
+            req.body.note
           );
 
           const orderItemsPromises = await req.body.products.map(
@@ -29,8 +32,6 @@ exports.addOrder = (req, res) => {
           );
           const orderItems = await Promise.all(orderItemsPromises);
           const done = orderItems.every((item) => item === true);
-          // console.log(orderItems)
-          // await orderService.updateCount();
           res.json(done);
         }
       });
@@ -41,61 +42,63 @@ exports.addOrder = (req, res) => {
 };
 
 exports.getByUser = (req, res) => {
-    try {
-        let token = req.cookies.token;
-        jwt.verify(token, process.env.JWT_SECRET, async(err, verifiedJwt) => {
-            if(err) {
-                res.status(400).send('not logged in')
-            }
-            else{
-                await orderService.getByUser(verifiedJwt).then((data) => {
-                    res.status(200).json(data)
-                })
-                .catch((err) => {
-                    res.status(500).json(err)
-                })
-            }
-        })
-    } catch (error) {
-        res.json(error);
-    }
-}
+  try {
+    let token = req.cookies.token;
+    jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
+      if (err) {
+        res.status(400).send("not logged in");
+      } else {
+        await orderService
+          .getByUser(verifiedJwt)
+          .then((data) => {
+            res.status(200).json(data);
+          })
+          .catch((err) => {
+            res.status(500).json(err);
+          });
+      }
+    });
+  } catch (error) {
+    res.json(error);
+  }
+};
 
 exports.getDetailOrder = (req, res) => {
-    try {
-        let id = req.params.id
-        let token = req.cookies.token;
-        jwt.verify(token, process.env.JWT_SECRET, async(err, verifiedJwt) => {
-            if(err) {
-                res.status(400).send('not logged in')
-            }
-            else{
-              await orderService.getDetailOrder({id: id, user: verifiedJwt.id }).then((data) => {
-                res.status(200).json(data)
-              }).catch((err) => {
-                res.json(err)
-              })
-            }
+  try {
+    let id = req.params.id;
+    let token = req.cookies.token;
+    jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
+      if (err) {
+        res.status(400).send("not logged in");
+      } else {
+        await orderService
+          .getDetailOrder({ id: id, user: verifiedJwt.id })
+          .then((data) => {
+            res.status(200).json(data);
           })
-    } catch (error) {
-        console.log(error)
-    }
-}
+          .catch((err) => {
+            res.json(err);
+          });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 exports.getAllOrders = (req, res) => {
   try {
     let token = req.cookies.token;
-    jwt.verify(token, process.env.JWT_SECRET, async(err, verifiedJwt) => {
-        if(err) {
-            res.status(400).send('not logged in')
-        }
-        else{
-          await orderService.getAllOrders().then((dt) => {
-            res.json(dt)
-          })
-      }}
-      )
+    jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
+      if (err) {
+        res.status(400).send("not logged in");
+      } else {
+        await orderService.getAllOrders().then((dt) => {
+          res.json(dt);
+        });
+      }
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};

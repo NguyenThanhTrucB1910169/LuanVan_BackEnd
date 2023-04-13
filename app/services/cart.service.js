@@ -3,11 +3,8 @@ const sequelize = require("sequelize");
 
 const cartCreate = (userId) => {
   return new Promise(async (resolve, reject) => {
-    // console.log("userid" , userId);
     try {
       let findUser = await db.Carts.findAll({ where: { userId: userId } });
-      // console.log(typeof findUser)
-      // console.log(!findUser)
       if (findUser.length === 0) {
         await db.Carts.create({
           userId: userId,
@@ -24,7 +21,6 @@ const cartCreate = (userId) => {
 const getCartId = (userId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log(userId);
       let cartid = await db.Carts.findOne({
         where: { userId: userId },
         attributes: ["id"],
@@ -39,18 +35,13 @@ const getCartId = (userId) => {
 const createCartItem = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      // console.log(data);
-      // console.log(data.cartId)
-      // console.log(data)
       let product = await db.CartItems.findOne({
         where: {
           productId: data.productId,
           cartId: data.cartId,
         },
       });
-      console.log(product);
       if (product) {
-        console.log("qty", typeof data.quantity);
         if (parseInt(data.quantity) === 1) {
           await db.CartItems.update(
             {
@@ -73,12 +64,6 @@ const createCartItem = (data) => {
           quantity: data.quantity,
         });
       }
-
-      // await db.CartItems.create({
-      //   cartId: data.cartId,
-      //   productId: data.productId,
-      //   quantity: data.quantity
-      // });
       resolve("success");
     } catch (e) {
       reject(e);
@@ -119,7 +104,6 @@ const updateCartItem = (userId, req) => {
     console.log(req);
     try {
       await getCartId(userId).then(async (response) => {
-        // console.log(response);
         await db.CartItems.update(
           { quantity: req.qt },
           { where: { cartId: response.id, productId: req.pd } }
@@ -129,8 +113,6 @@ const updateCartItem = (userId, req) => {
           });
         });
       });
-      // console.log(cartid)
-      // console.log('update', req.id)
     } catch (error) {
       reject(error);
     }
@@ -140,9 +122,7 @@ const updateCartItem = (userId, req) => {
 const deleteCartItem = (user, id) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log(user, id);
       await getCartId(user).then(async (response) => {
-        // console.log(response);
         await db.CartItems.destroy({
           where: { cartId: response.id, productId: id },
         }).then(() => {
@@ -168,14 +148,8 @@ const deleteAllCart = (id) => {
           where: { userId: id },
         });
         await db.CartItems.destroy({ where: { cartId: data.id } });
-        // console.log(data.id);
-        resolve(true)
+        resolve(true);
       });
-      // await db.Carts.destroy({
-      //   where: {userId: id}
-      // }).then(async() => {
-      //   db.CartItems.destroy
-      // })
     } catch (error) {
       reject(error);
     }

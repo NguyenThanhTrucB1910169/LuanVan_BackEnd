@@ -1,6 +1,4 @@
-// import bcrypt from 'bcryptjs'
 import db from "../models/index";
-// var salt = bcrypt.genSaltSync(10);
 
 let createNewProduct = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -48,17 +46,6 @@ let findById = (idpd) => {
   });
 };
 
-const getByCartItem = () => {
-  return new Promise(async (resolve, reject) => {
-    // await db.Products.findAll({
-    //   include: [{ model: db.CartItems }],
-    //   raw: true,
-    // }).then((data) => {
-    //   resolve(data);
-    // });
-  });
-};
-
 const getAllId = () => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -101,12 +88,12 @@ const updateProduct = (product) => {
           image: product.imageUrl.toString(),
         },
         {
-          where: { id: product.id }
+          where: { id: product.id },
         }
       ).then(() => {
-        db.Products.findOne({where: {id: product.id}}).then(product => {
+        db.Products.findOne({ where: { id: product.id } }).then((product) => {
           resolve(product);
-        })
+        });
       });
     } catch (error) {
       reject(error);
@@ -118,7 +105,6 @@ module.exports = {
   createNewProduct,
   getAllProducts,
   findById,
-  getByCartItem,
   getAllId,
   deleteProduct,
   updateProduct,
