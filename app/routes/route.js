@@ -25,5 +25,7 @@ router.route("/updateinfo").put(users.updateInfo);
 router.route("/getallusers").get(users.getAllUsers);
 router.route("/order").post(order.addOrder).get(order.getByUser);
 router.route("/order/:id").get(order.getDetailOrder);
+router.route("/orderdeliver/").get(order.getOrderDeliver)
 router.route("/allorders").get(order.getAllOrders);
+router.route("/updatestatus").put(order.updateStatus);
 module.exports = router;

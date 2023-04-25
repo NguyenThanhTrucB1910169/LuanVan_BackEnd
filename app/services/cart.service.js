@@ -123,6 +123,7 @@ const deleteCartItem = (user, id) => {
   return new Promise(async (resolve, reject) => {
     try {
       await getCartId(user).then(async (response) => {
+      console.log(response)
         await db.CartItems.destroy({
           where: { cartId: response.id, productId: id },
         }).then(() => {

@@ -136,6 +136,30 @@ const getAllOrders = () => {
   });
 };
 
+const updateStatus = (id, status) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.Orders.update({ status: status }, { where: { id: id } }).then(
+        (result) => resolve(result)
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const getOrderStatus = (id, status) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.Orders.findAll(
+        { where: { userId: id, status: status } }
+      ).then((result) => resolve(result));
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   addOrder,
   addOrderItem,
@@ -143,4 +167,6 @@ module.exports = {
   getByUser,
   getDetailOrder,
   getAllOrders,
+  updateStatus,
+  getOrderStatus,
 };

@@ -102,3 +102,55 @@ exports.getAllOrders = (req, res) => {
     console.log(error);
   }
 };
+
+exports.updateStatus = async (req, res) => {
+  try {
+    if (req.body.id) {
+      let token = req.cookies.token;
+      jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
+        if (err) console.log(err);
+        else if (verifiedJwt.role === "undefined" || verifiedJwt.role !== 1) {
+          await orderService
+            .updateStatus(req.body.id, req.body.status)
+            .then(async (rs) => {
+              if (rs[0] === 1) {
+                orderService.getByUser(verifiedJwt).then((data) => {
+                  res.status(200).json([0,...data]);
+                });
+              }
+            });
+        } else {
+          await orderService
+            .updateStatus(req.body.id, req.body.status)
+            .then(async (rs) => {
+              if (rs[0] === 1) {
+                await orderService.getAllOrders().then((dt) => {
+                  res.status(200).json([verifiedJwt.role, ...dt]);
+                });
+              }
+            });
+        }
+      });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+};
+
+exports.getOrderDeliver = async (req, res) => {
+  try {
+    let token = req.cookies.token;
+    jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
+      if (err) {
+        console.log(err);
+        res.status(400).send("not logged in");
+      } else {
+        await orderService.getOrderStatus(verifiedJwt.id, 1).then((dt) => {
+          res.status(200).json(dt);
+        })
+      }
+    })
+  } catch (error) {
+    res.json(error);
+  }
+}
