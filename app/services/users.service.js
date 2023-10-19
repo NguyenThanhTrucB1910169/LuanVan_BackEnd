@@ -66,9 +66,24 @@ const getAllUsers = () => {
   });
 };
 
+
+const getUserById = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await db.Users.findOne({
+        where: { id: id },
+      }).then((users) => resolve(users));
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+
 module.exports = {
   createNewUser,
   authUser,
   updateUser,
   getAllUsers,
+  getUserById
 };

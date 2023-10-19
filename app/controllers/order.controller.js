@@ -6,21 +6,22 @@ exports.addOrder = (req, res) => {
   try {
     if (req.body) {
       let token = req.cookies.token;
-
+      console.log("bắt đầu thực hiện Add Order");
       jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
         if (err) {
           console.log(err.message);
         } else {
-          console.log(req.body);
           const order = await orderService.addOrder(
             verifiedJwt.id,
             req.body.total,
             req.body.status,
-            req.body.note
+            req.body.note,
+            req.body.payment
           );
 
           const orderItemsPromises = await req.body.products.map(
             async (item) => {
+              console.log('số lần thực hiện')
               const data = {
                 orderId: order.id,
                 productId: item.id,
@@ -30,13 +31,42 @@ exports.addOrder = (req, res) => {
               return orderService.addOrderItem(data);
             }
           );
-          const orderItems = await Promise.all(orderItemsPromises);
-          const done = orderItems.every((item) => item === true);
-          res.json(done);
+          // const orderItems = await Promise.all(orderItemsPromises);
+          let completedCount = 0;
+          Promise.all(orderItemsPromises)
+            .then(async () => {
+              // completedCount++;
+              // console.log(completedCount);
+              // if (completedCount === req.body.products.length) {
+                console.log(completedCount);
+                const orderInfo = await orderService.getOrderById(order.id);
+                console.log('orderInfo gửi về client', orderInfo);
+                res.status(200).json(orderInfo);
+                // res.json(orderInfo);
+              // }
+            })
+            .catch((error) => {
+              console.error(
+                "Lỗi khi thực hiện các promises orderItems:",
+                error
+              );
+              res.status(500).json({ error: "Có lỗi xảy ra" });
+            });
+          // const done = orderItems.every(
+          //   (item) => item === true,
+          //   async () => {
+          //     await orderService.getOrderById(order.id).then((result) => {
+          //       console.log(result);
+          //       // if(res)
+          //       res.json(result);
+          //     });
+          //   }
+          // );
         }
       });
     }
   } catch (error) {
+    console.log("ERROR ", error);
     res.json(error);
   }
 };
@@ -115,7 +145,7 @@ exports.updateStatus = async (req, res) => {
             .then(async (rs) => {
               if (rs[0] === 1) {
                 orderService.getByUser(verifiedJwt).then((data) => {
-                  res.status(200).json([0,...data]);
+                  res.status(200).json([0, ...data]);
                 });
               }
             });
@@ -139,18 +169,10 @@ exports.updateStatus = async (req, res) => {
 
 exports.getOrderDeliver = async (req, res) => {
   try {
-    let token = req.cookies.token;
-    jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
-      if (err) {
-        console.log(err);
-        res.status(400).send("not logged in");
-      } else {
-        await orderService.getOrderStatus(verifiedJwt.id, 1).then((dt) => {
-          res.status(200).json(dt);
-        })
-      }
-    })
+    await orderService.getOrderStatus(req.user.id, 1).then((dt) => {
+      res.status(200).json(dt);
+    });
   } catch (error) {
     res.json(error);
   }
-}
+};

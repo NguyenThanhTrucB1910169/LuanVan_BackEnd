@@ -4,7 +4,10 @@ const cors = require("cors");
 const app = express();
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const path = require("path");
+const multer = require('multer');
 const backendRouter = require("./app/routes/route");
+const products = require('./app/controllers/products.controller');
 
 app.use(cookieParser());
 app.use(
@@ -14,10 +17,12 @@ app.use(
     credentials: true,
   })
 );
+
+const uploadPath = path.join(__dirname, 'uploads');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/api", backendRouter);
-
+app.use('/uploads', express.static(uploadPath));
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to web application." });
 });
@@ -31,5 +36,4 @@ app.use((err, req, res, next) => {
     message: err.message || "Internal Server Error",
   });
 });
-
 module.exports = app;

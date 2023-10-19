@@ -9,6 +9,7 @@ const sendToken = (user, statusCode, res, usersend) => {
 
   if (usersend !== null) {
     let id = user.id;
+    console.log(id)
     res.status(statusCode).cookie("token", token, options).json({
       isAuth: true,
       key: id,

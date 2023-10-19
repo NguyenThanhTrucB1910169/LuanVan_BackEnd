@@ -1,6 +1,6 @@
 import db from "../models/index";
 
-const addOrder = (id, price, status, note) => {
+const addOrder = (id, price, status, note, payment) => {
   return new Promise(async (resolve, reject) => {
     try {
       const newOrder = await db.Orders.create({
@@ -8,6 +8,7 @@ const addOrder = (id, price, status, note) => {
         totalPrice: price,
         status: status,
         note: note,
+        payment: payment,
       });
       await newOrder.reload();
       resolve(newOrder);
@@ -19,7 +20,6 @@ const addOrder = (id, price, status, note) => {
 
 const addOrderItem = (data) => {
   return new Promise(async (resolve, reject) => {
-    console.log(data);
     try {
       await db.OrderItems.create({
         orderId: data.orderId,
@@ -31,7 +31,7 @@ const addOrderItem = (data) => {
         where: { id: data.productId },
         attributes: ["count"],
       }).then(async (res) => {
-        console.log("main", res.count);
+        // console.log("main", res.count);
         let remain = res.count - data.quantity;
         await db.Products.update(
           { count: remain },
@@ -39,6 +39,36 @@ const addOrderItem = (data) => {
         );
       });
       resolve(true);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
+const getOrderById = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      db.Orders.findOne({
+        where: { id: id },
+        include: [
+          {
+            model: db.Products, // Model của sản phẩm
+            through: { model: db.OrderItems, as: "orderItems" }, // Model của bảng trung gian
+          },
+        ],
+      })
+        .then((order) => {
+          if (!order) {
+            resolve("");
+          } else {
+            console.log(order.dataValues);
+            resolve(order.dataValues);
+          }
+        })
+        .catch((error) => {
+          reject(error);
+        });
+      // resolve(true);
     } catch (e) {
       reject(e);
     }
@@ -151,9 +181,9 @@ const updateStatus = (id, status) => {
 const getOrderStatus = (id, status) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await db.Orders.findAll(
-        { where: { userId: id, status: status } }
-      ).then((result) => resolve(result));
+      await db.Orders.findAll({ where: { userId: id, status: status } }).then(
+        (result) => resolve(result)
+      );
     } catch (error) {
       reject(error);
     }
@@ -169,4 +199,5 @@ module.exports = {
   getAllOrders,
   updateStatus,
   getOrderStatus,
+  getOrderById
 };

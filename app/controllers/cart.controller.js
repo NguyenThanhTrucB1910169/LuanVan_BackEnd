@@ -4,13 +4,28 @@ require("dotenv").config();
 
 exports.addToCart = async (req, res) => {
   try {
+    // await cartService.cartCreate(verifiedJwt.id);
+    // let cartid = await cartService.getCartId(verifiedJwt.id);
+    // let data = {
+    //   productId: req.params.idpd,
+    //   cartId: cartid.id,
+    //   quantity: req.params.qt,
+    // };
+    // await cartService.createCartItem(data).then((val) => {
+    //   res.json(val);
+    // });
+
+    
+    console.log(req)
     const token = req.cookies.token;
+    console.log(token)
     jwt.verify(token, process.env.JWT_SECRET, async (err, verifiedJwt) => {
       if (err) {
         console.log(err.message);
       } else {
         await cartService.cartCreate(verifiedJwt.id);
         let cartid = await cartService.getCartId(verifiedJwt.id);
+        console.log(cartid);
         let data = {
           productId: req.params.idpd,
           cartId: cartid.id,
@@ -94,7 +109,8 @@ exports.deleteAllCart = async (req, res) => {
           console.log(err.message);
         } else {
           await cartService.deleteAllCart(verifiedJwt.id).then((rs) => {
-            res.json(rs);
+            console.log(rs)
+            res.json('kết quả từ delete all cart');
           });
         }
       });

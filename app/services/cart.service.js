@@ -139,6 +139,7 @@ const deleteCartItem = (user, id) => {
 };
 
 const deleteAllCart = (id) => {
+  console.log(id);
   return new Promise(async (resolve, reject) => {
     try {
       await db.Carts.findOne({

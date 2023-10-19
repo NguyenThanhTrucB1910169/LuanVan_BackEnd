@@ -12,15 +12,21 @@ module.exports = {
       userId: {
         type: Sequelize.INTEGER
       },
-      status: {
-        type: Sequelize.STRING(500)
-      },
       // address: {
       //   type: Sequelize.STRING
       // },
+      status: {
+        type: Sequelize.INTEGER
+      },  
       totalPrice: {
         type: Sequelize.INTEGER
       },
+      payment: {
+        type: Sequelize.STRING(500)
+      },
+      note: {
+        type: Sequelize.STRING(500)
+      },        
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

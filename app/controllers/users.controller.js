@@ -19,6 +19,7 @@ exports.authLogin = async (req, res) => {
     res.send("Content empty");
   }
   const user = await userService.authUser(req.body);
+  console.log(user);
   if (!user) {
     res.send("invalid info");
   } else if (user.role === 1) {
@@ -81,5 +82,17 @@ exports.getAllUsers = (req, res) => {
     }
   } catch (error) {
     new ApiError(500, "Get users unsuccessfully");
+  }
+};
+
+exports.getByUserId = async (req, res) => {
+  try {
+    let id = req.params.id;
+    console.log(id)
+    await userService.getUserById(id).then((user) => {
+      res.status(200).json(user);
+    });
+  } catch (error) {
+    new ApiError(500, "Get user By Id unsuccessfully");
   }
 };

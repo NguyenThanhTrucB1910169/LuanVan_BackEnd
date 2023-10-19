@@ -3,15 +3,17 @@ import db from "../models/index";
 let createNewProduct = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
+      // console.log(data.image.toString());
       await db.Products.create({
         id: data.id,
         name: data.name,
         description: data.description,
-        image: data.imageUrl.toString(),
+        image: data.image.toString(),
         type: data.type,
         material: data.material,
         count: data.count,
         price: data.price,
+        category: data.category,
       });
       resolve("Creat done");
     } catch (e) {
@@ -23,10 +25,11 @@ let createNewProduct = (data) => {
 let getAllProducts = () => {
   return new Promise(async (resolve, reject) => {
     try {
-      var users = await db.Products.findAll({
+      var products = await db.Products.findAll({
         raw: true,
       });
-      resolve(users);
+      // console.log(products)
+      resolve(products);
     } catch (e) {
       reject(e);
     }
@@ -85,7 +88,8 @@ const updateProduct = (product) => {
           type: product.type,
           description: product.description,
           material: product.material,
-          image: product.imageUrl.toString(),
+          image: product.image.toString(),
+          category: product.category
         },
         {
           where: { id: product.id },
