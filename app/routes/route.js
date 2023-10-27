@@ -9,34 +9,85 @@ const router = express.Router();
 const path = require("path");
 const multer = require("multer");
 const uploadPath = path.join(process.cwd(), "uploads");
-const {  isAuthenticatedUser } = require("../middleware/auth");
-const fs = require('fs');
+const { isAuthenticatedUser } = require("../middleware/auth");
+const fs = require("fs");
+
+function checkAvatarUpload(req, res, next) {
+  const isAvatarUpload = req.body.isAvatar;
+  const updateAddress = req.body.updateAddress;
+  const updateAvatar = req.body.updateAvatar;
+  console.log(typeof isAvatarUpload)
+  console.log(typeof updateAddress)
+  console.log(typeof updateAvatar)
+  if (
+    (isAvatarUpload === 'true' &&
+      updateAddress === 'true' &&
+      updateAvatar === 'false') ||
+    (isAvatarUpload === 'true' &&
+      updateAddress === 'false' &&
+      updateAvatar === 'false')
+  ) {
+    console.log('vao update thông tin')
+    return next();
+  }
+
+  next();
+}
+
+function checkUpdatedImage(req, res, next) {
+  const isUpdateImage = req.body.isUpdateImage;
+  if(isUpdateImage === 'false'){
+    console.log('not update')
+    return next();
+  }
+  console.log('update')
+  next();
+}
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    const productId = req.body.id; // Lấy mã sản phẩm từ yêu cầu (đảm bảo rằng bạn đã gửi mã sản phẩm cùng với yêu cầu)
-    // const image = req.body.image; // Lấy mã sản phẩm từ yêu cầu (đảm bảo rằng bạn đã gửi mã sản phẩm cùng với yêu cầu)
-    // console.log(image)
-    if (!productId) {
-      return cb(new Error('Mã sản phẩm không được tìm thấy.'));
+    console.log(req.body);
+    const isAvatarUpload = req.body.isAvatar;
+    console.log("isAvatarUpload ", typeof isAvatarUpload);
+    if (isAvatarUpload === 'true') {
+      const userId = req.user.id;
+      if (!userId) {
+        return cb(new Error("ID người dùng không được tìm thấy."));
+      }
+      const originalFilename = file.originalname;
+      console.log(originalFilename);
+      const newFilename = `avatar_${userId}_${originalFilename}`;
+      console.log(newFilename);
+      const filePath = path.join(uploadPath, newFilename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return cb(null, newFilename);
+    } else {
+      const productId = req.body.id;
+      console.log(productId)
+      if (!productId) {
+        return cb(new Error("Mã sản phẩm không được tìm thấy."));
+      }
+      // if (updateImage === false) {
+      //   return next();
+      // }
+      const originalFilename = file.originalname;
+      console.log(originalFilename);
+      const newFilename = `product_${productId}_${originalFilename}`;
+      console.log('newFilename ', newFilename);
+      const filePath = path.join(uploadPath, newFilename);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+      return cb(null, newFilename);
     }
-    const originalFilename = file.originalname;
-    console.log(originalFilename)
-    const newFilename = `product_${productId}_${originalFilename}`;
-    console.log(newFilename)
-    const filePath = path.join(uploadPath, newFilename);
-    console.log(filePath)
-    // Kiểm tra xem tệp ảnh cũ đã tồn tại
-    if (fs.existsSync(filePath)) {
-      // Nếu tệp ảnh cũ tồn tại, hãy xóa nó trước khi ghi đè
-      fs.unlinkSync(filePath);
-    }
-    
-    cb(null, newFilename);
-  }
+  },
 });
+
 const upload = multer({ storage: storage });
 
 // ROUTE OF PRODUCTS
@@ -44,7 +95,7 @@ router
   .route("/products")
   .get(products.getData)
   .post(upload.array("image", 3), products.sendData)
-  .put(upload.array("image", 3),products.updateProduct);
+  .put(checkUpdatedImage, upload.array("image", 3), products.updateProduct);
 router.route("/product/:id").get(products.getById);
 router.route("/allidproducts").get(products.getAllIds);
 router.route("/deleteproduct").delete(products.deleteProduct);
@@ -59,12 +110,19 @@ router.route("/alldelete").delete(cart.deleteAllCart);
 router.route("/signup").post(users.createUser);
 router.route("/login").post(users.authLogin);
 router.route("/logout").get(users.logout);
-router.route("/updateinfo").put(users.updateInfo);
+router
+  .route("/updateinfo")
+  .put(
+    isAuthenticatedUser,
+    checkAvatarUpload,
+    upload.single("avatar"),
+    users.updateInfo
+  );
 router.route("/getallusers").get(users.getAllUsers);
-router.route('/getById/:id').get(users.getByUserId);
+router.route("/getById/:id").get(users.getByUserId);
 
 // ROUTE OF ORDER
-router.route("/order").post(order.addOrder)
+router.route("/order").post(order.addOrder);
 router.route("/orderByUser").get(order.getByUser);
 router.route("/order/:id").get(order.getDetailOrder);
 router.route("/orderdeliver/").get(order.getOrderDeliver);
@@ -72,11 +130,13 @@ router.route("/allorders").get(order.getAllOrders);
 router.route("/updatestatus").put(order.updateStatus);
 
 // ROUTE OF REVIEWS
-router.route("/reviews").post(isAuthenticatedUser, review.addNewReview)
-router.route("/getReviews/byProduct/:id").get(review.getReviewByProduct)
-
+router.route("/reviews").post(isAuthenticatedUser, review.addNewReview);
+router.route("/getReviews/byProduct/:id").get(review.getReviewByProduct);
+router.route('/getReviewsByUser').get(isAuthenticatedUser, review.getReviewsByUser )
 
 // ROUTE OF PAYMENT
 router.route("/payment").post(isAuthenticatedUser, payment.handlePayment);
-router.route("/stripeapikey").get(isAuthenticatedUser, payment.sendStripeApiKey);
+router
+  .route("/stripeapikey")
+  .get(isAuthenticatedUser, payment.sendStripeApiKey);
 module.exports = router;

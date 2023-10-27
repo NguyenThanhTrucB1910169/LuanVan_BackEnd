@@ -3,7 +3,6 @@ import db from "../models/index";
 let createNewProduct = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      // console.log(data.image.toString());
       await db.Products.create({
         id: data.id,
         name: data.name,
@@ -28,7 +27,6 @@ let getAllProducts = () => {
       var products = await db.Products.findAll({
         raw: true,
       });
-      // console.log(products)
       resolve(products);
     } catch (e) {
       reject(e);
@@ -80,6 +78,7 @@ const deleteProduct = (id) => {
 const updateProduct = (product) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log('Updating product ', product);
       await db.Products.update(
         {
           name: product.name,

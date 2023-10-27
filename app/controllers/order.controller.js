@@ -150,6 +150,7 @@ exports.updateStatus = async (req, res) => {
               }
             });
         } else {
+          console.log(req.body)
           await orderService
             .updateStatus(req.body.id, req.body.status)
             .then(async (rs) => {

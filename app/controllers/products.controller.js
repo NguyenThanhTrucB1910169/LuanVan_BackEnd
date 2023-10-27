@@ -96,25 +96,48 @@ exports.updateProduct = async (req, res) => {
   //   console.log(error);
   // }
   try {
-    const getFileName = [];
-    // console.log(req.files)
-    await req.files.forEach((file) => {
-      // console.log()
-      getFileName.push(file.filename)
-    });
-    console.log(getFileName)
-    const data = {
-      id: req.body.id,
-      name: req.body.name,
-      price: req.body.price,
-      count: req.body.count,
-      image: getFileName,
-      description: req.body.description,
-      type: req.body.type,
-      material: req.body.material,
-      category: req.body.category,
-    };
+    const updateImage = req.body.isUpdateImage;
+    console.log('req.body ', req.body)
+    var data = {};
+    console.log('updateImage ', typeof updateImage)
+    if(updateImage === 'true') {
+      console.log('VAO UPDATE IS TRUE')
+      const getFileName = [];
+      // console.log(req.files)
+      await req.files.forEach((file) => {
+        // console.log()
+        getFileName.push(file.filename)
+      });
+      console.log('getFileName ', getFileName)
+      data = {
+        id: req.body.id,
+        name: req.body.name,
+        price: req.body.price,
+        count: req.body.count,
+        image: getFileName,
+        description: req.body.description,
+        type: req.body.type,
+        material: req.body.material,
+        category: req.body.category,
+      };
+    }
+    else{
+      console.log(req.body);
+      data = {
+        id: req.body.id,
+        name: req.body.name,
+        price: req.body.price,
+        count: req.body.count,
+        image: req.body.image,
+        description: req.body.description,
+        type: req.body.type,
+        material: req.body.material,
+        category: req.body.category,
+      };
+    }
+    console.log(data)
     await productServices.updateProduct(data).then((rs) => {
+      console.log(rs)
       res.json(rs);
     });
     // res.send("create success");

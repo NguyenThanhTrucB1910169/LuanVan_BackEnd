@@ -42,7 +42,7 @@ const updateUser = (info, id) => {
   // console.log(info)
   return new Promise((resolve, reject) => {
     try {
-      // console.log(info)
+      console.log(info)
       db.Users.update(info, { where: { id: id } })
         .then(() => {
           return db.Users.findOne({ where: { id: id } });

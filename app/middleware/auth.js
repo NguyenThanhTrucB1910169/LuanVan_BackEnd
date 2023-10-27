@@ -4,10 +4,10 @@ import * as userService from "../services/users.service";
 
 exports.isAuthenticatedUser = async (req, res, next) => {
     try {
-      console.log(req)
+      // console.log(req)
       const { token } = req.cookies;
-      console.log(req.cookies)
-      console.log(token);
+      // console.log(req.cookies)
+      // console.log(token);
       if (!token) {
         throw new Error("Please Login to access");
       }

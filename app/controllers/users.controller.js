@@ -46,21 +46,54 @@ exports.logout = (req, res) => {
 
 exports.updateInfo = async (req, res) => {
   try {
-    if (req.cookies.token) {
-      jwt.verify(
-        req.cookies.token,
-        process.env.JWT_SECRET,
-        async (err, jwtoken) => {
-          if (err) console.log(err);
-          else {
-            await userService.updateUser(req.body, jwtoken.id).then((val) => {
-              res.status(200).json(val);
-            });
-          }
-        }
-      );
+    let data = {};
+    const isAvatarUpload = JSON.parse(req.body.isAvatar);
+    const updateAddress = JSON.parse(req.body.updateAddress);
+    const updateAvatar = JSON.parse(req.body.updateAvatar);
+    if (
+      isAvatarUpload === true &&
+      updateAddress === true &&
+      updateAvatar === false
+    ) {
+      data = {
+        id: req.user.id,
+        fullname: req.body.fullname,
+        phone: req.body.phone,
+        email: req.body.email,
+        address: req.body.address,
+      };
+    } else if (
+      isAvatarUpload === true &&
+      updateAddress === false &&
+      updateAvatar === false
+    ) {
+      data = {
+        id: req.user.id,
+        fullname: req.body.fullname,
+        phone: req.body.phone,
+        email: req.body.email,
+        address: req.body.address,
+        avatar: req.body.avatar,
+      };
+      console.log("data ", data);
+    } else {
+      const filename = req.file.filename;
+      data = {
+        id: req.user.id,
+        fullname: req.body.fullname,
+        phone: req.body.phone,
+        email: req.body.email,
+        password: req.body.password,
+        address: req.body.address,
+        avatar: filename,
+      };
     }
+    await userService.updateUser(data, data.id).then((val) => {
+      console.log(val);
+      res.status(200).json(val);
+    });
   } catch (error) {
+    console.log("vao error");
     new ApiError(500, "Update unsuccessfully");
   }
 };
@@ -88,7 +121,7 @@ exports.getAllUsers = (req, res) => {
 exports.getByUserId = async (req, res) => {
   try {
     let id = req.params.id;
-    console.log(id)
+    console.log(id);
     await userService.getUserById(id).then((user) => {
       res.status(200).json(user);
     });

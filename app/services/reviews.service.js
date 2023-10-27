@@ -3,13 +3,13 @@ import db from "../models/index";
 let createReview = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await db.Reviews.create({
+      const newReview = await db.Reviews.create({
         userId: data.userId,
         productId: data.productId,
         rating: data.rating,
         reviewText: data.reviewText,
       });
-      resolve(true);
+      resolve(newReview);
     } catch (e) {
       reject(e);
     }
@@ -31,7 +31,23 @@ let getReviewByProductId = (id) => {
   });
 };
 
+let getReviewByUserId = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // console.log(data.image.toString());
+      await db.Reviews.findAll({
+        where: { userId: id },
+      }).then((reviews) => {
+        resolve(reviews);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
 module.exports = {
   createReview,
   getReviewByProductId,
+  getReviewByUserId
 };

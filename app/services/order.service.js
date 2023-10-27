@@ -169,6 +169,8 @@ const getAllOrders = () => {
 const updateStatus = (id, status) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log(status);
+      console.log(id);
       await db.Orders.update({ status: status }, { where: { id: id } }).then(
         (result) => resolve(result)
       );
