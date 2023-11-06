@@ -9,12 +9,16 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      // OrderItems.belongsTo(models.Products, { foreignKey: 'productId' });
+      // OrderItems.belongsTo(models.Orders, { foreignKey: 'orderId' });
+      OrderItems.belongsTo(models.Orders, { foreignKey: 'orderId' });
     }
   }
   OrderItems.init(
     {
       orderId: DataTypes.INTEGER,
-      productId: DataTypes.STRING,
+      name: DataTypes.STRING,
+      image: DataTypes.STRING,
       quantity: DataTypes.INTEGER,
       price: DataTypes.INTEGER,
     },
@@ -25,6 +29,5 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "OrderItems",
     }
   );
-  OrderItems.removeAttribute("id");
   return OrderItems;
 };

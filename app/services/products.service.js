@@ -24,6 +24,7 @@ let createNewProduct = (data) => {
 let getAllProducts = () => {
   return new Promise(async (resolve, reject) => {
     try {
+      // console.log('page ', page);
       var products = await db.Products.findAll({
         raw: true,
       });

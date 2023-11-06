@@ -121,7 +121,7 @@ exports.getAllUsers = (req, res) => {
 exports.getByUserId = async (req, res) => {
   try {
     let id = req.params.id;
-    console.log(id);
+    console.log('vao ham getByUserId', id);
     await userService.getUserById(id).then((user) => {
       res.status(200).json(user);
     });
